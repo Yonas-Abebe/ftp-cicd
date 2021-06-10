@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2339d725-04d6-4e01-81d2-407720c1a63b" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<ftp:config name="FTP_Config" doc:name="FTP Config" doc:id="01e22a64-5b71-4cb4-a5bd-f6c70c450448" >
+		<ftp:connection workingDir="${ftp.directory}" host="${ftp.host}" port="${ftp.port}" username="${ftp.username}" password="${secure::ftp.password}" />
+	</ftp:config>
+	<global-property doc:name="Global Property" doc:id="c9d6f24c-2b06-498c-b4a0-a14f0147c25f" name="env" value="local" />
+	<configuration-properties doc:name="Configuration properties" doc:id="e84f9c2a-a57f-4e71-9fb4-67487753dfe2" file="local.properties" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="3be7849c-f277-4542-967b-39211b6d6f64" file="local-secured.properties" key="Mayo7882*#*Redu2009*#*" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="33380a1f-148d-4df1-bb35-b5d35393b833" >
+		<file:connection workingDir="${file.directory}" />
+	</file:config>
+	<flow name="ftp-cicdFlow" doc:id="7277b19b-47ff-4a45-9ae5-0e24465fb3c8" >
+		<http:listener doc:name="Listener" doc:id="586b90e3-329b-4170-9bc8-e6f5d2a70d45" config-ref="HTTP_Listener_config" path="${http.path}"/>
+		<file:read doc:name="Read" doc:id="a839115c-8571-40f4-864e-a11cc4059d24" config-ref="File_Config" path="L:\local\TestDirectory\read\testFile4READ.txt"/>
+		<logger level="INFO" doc:name="አማርኛ ሎገር" doc:id="2e669ca4-d084-4572-ae3f-0f0e825af15d" message="ፋይሉን አንብቤያለሁ! ወደ መጻፊያው ተላልፏል!"/>
+		<ftp:write doc:name="ጻፊ" doc:id="df2e8cee-5852-44f2-9562-ecfb2e578cd0" config-ref="FTP_Config" path="amharic.txt"/>
+		<ee:transform doc:name="Transform Message" doc:id="f9d00aed-9c13-4ecd-b536-92a3cc9897e5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "ይህ CICD APP ከፋይል አንብቦ ኤፍቲፒ ላይ ይጽፋል!"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="ውጤት ማረጋገጫ ሎገር" doc:id="cf9469cf-0f61-410c-9795-a690b24d1e30" message="ውጤት!"/>
+	</flow>
+</mule>
